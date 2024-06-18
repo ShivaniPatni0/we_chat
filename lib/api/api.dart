@@ -8,7 +8,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:http/http.dart';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:googleapis_auth/auth_io.dart' as auth;
+import 'package:googleapis/servicecontrol/v1.dart';
 
 class APIs {
 //for authentication
@@ -24,6 +27,8 @@ class APIs {
   static FirebaseStorage storage = FirebaseStorage.instance;
   static get user => auth.currentUser!;
   static late ChatUser me;
+
+  PushNotificationServices? _notificationServices;
 
   //for getting firebase messaging token
 
@@ -98,7 +103,7 @@ class APIs {
     final time = DateTime.now().millisecondsSinceEpoch.toString();
     final chatuser = ChatUser(
         name: user.displayName.toString(),
-        about:"Hey",
+        about: "Hey",
         isOnline: false,
         pushToken: '',
         lastActive: time,
@@ -167,13 +172,13 @@ class APIs {
         }
       };
 
-      var res = await post(
+      var res = await http.post(
           Uri.parse(
               'https://fcm.googleapis.com/v1/projects/we-chat-2c0c7/messages:send'),
           headers: {
             HttpHeaders.contentTypeHeader: 'application/json',
             HttpHeaders.authorizationHeader:
-                'Bearer ya29.a0AXooCgsoOaoZJZ2V6559fux8z5RhNOWzhrpB5IdwJ1s-0a-7w38k_G6Jh3JQt3wN84btWVIRRIsMapewhR08kyEGdWU4HGcQzWkLmdML1fv8eoZRlbQRVo4F5TTmk1xhdhnMP9p8gsTSvW9P7CQSkx3JLKqSk_ppRN0daCgYKAVUSARMSFQHGX2MiOoxdqjhGpC6MIM5acEGopQ0171'
+                'Bearer 1//04UhCfGNaoRoICgYIARAAGAQSNwF-L9IrY8deyBrMRwsgVfXLGU9VViq2VRWjh8J_x0Wd590XQe65X8EnT0kQfPv3q1ySEdisZbQ'
           },
           body: jsonEncode(body));
       log('Response status: ${res.statusCode}');
@@ -254,8 +259,11 @@ class APIs {
         sent: time);
     final ref = firestore
         .collection('chats/${getConversationID(chatUser.id)}/messages');
-    await ref.doc(time).set(message.toJson()).then((value) =>
-        sendPushNotification(chatUser, type == Type.text ? msg : 'image'));
+    await ref.doc(time).set(message.toJson()).then((value) async {
+      await PushNotificationServices.getAccessToken();
+      await PushNotificationServices.sendNotificationToSelectdDriver(
+          me.id, chatUser, msg);
+    });
   }
 
 //update read status of message
@@ -310,5 +318,78 @@ class APIs {
         .collection('chats/${getConversationID(message.told)}/messages')
         .doc(message.sent)
         .update({'msg': updatedMsg});
+  }
+}
+
+class PushNotificationServices {
+  static Future<String> getAccessToken() async {
+    final serviceAccountJson = {
+      "type": "service_account",
+      "project_id": "we-chat-2c0c7",
+      "private_key_id": "54fe6677ccb13aa01bdab1a06134f7d15a569b96",
+      "private_key":
+          "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDpP/VEsuK1QQ4B\nMgo2UTRqjQ6v76kdoIw6bA8euSkhwq9KidPS8bs84MkRQQrAb8t++jzNnkgeP+XS\nhh7164umUHaSsyreCF5yqUNL/E3hmT/cRBelKqmfZ6JH+Qd8ExsF5AhoXolTHkjk\ntdKveb+5oUeKLgIsxog4qflvt5zNqs+5n2LKY4TD8t47vS5y5iy0X+0fCVdLRyhN\nGYiaYX/rWnmLtl0xV4iujUOzz/hxyeZbLTz3LnHzhnhdP+LD5dx+8eVb6529EGR6\nA27RMntrqK94MR3UthnYwPZPTsJco0I7m6pqUhjsSG9sskmruo535OWSLJhLaNy6\nLOhAPoPVAgMBAAECggEADAAQIpdwfgJJkeqs51QAth2pPIiAQye0JzpRgdNlaBj/\n0z4pkYAB0dU/yv01bCakSdVehPaof7PqY00msSDL98PKgewpX7B/CXenYHSr3hg4\nFqFDNSpvfSXEDd9kUPAbsw8jFpmMh6P2fJvVKdWB9W80gsmwr3SMZBvsmyCPdu5C\nZ90Z8noOY0WMKH28JxmqzDPNOjZxXRIG7T1EQTjGglspzZNiTItlV/J93jqg7XtD\nIU42sS64V8m1ib86yRkrNnTvYrBwtz0sKDKmPz2UFQBathKasmNbamLkcXTlhhSY\nMz1qj3CpqOiZ7qQp7aVDyC3iKD++yTpz34eVXRWBEQKBgQD7JOaXHjasBvhAcWSw\nUTNyCJbK5CNV6K5UTxNcyDkCOMYuoeSIRWKGqzDlXSMCcMnGxcZWINP8IT+6NYQ9\nkO5jfTt96XSfWkBQppeDbGcKYK18yOnDfkpFokjV8E5BtLgaqNaUEaWpRSyIpcJk\ngu6WoGZfFEmOQSxGWtma444tpQKBgQDtwnwvEkZn2dD+7vf2UHtK8Dl4U/DWgWlu\noZb6wVuDlzux8cIzYLcBMJsKI9gX6j8dF4e9S5aSaBKFBmaMyIX6rU+JqS6WZKS7\ncKhqum6su5tFBq6vblo6sWgGOfZ2hY21JeJ3aIs/1WdE4vvsid8DBqZq2FInGi6I\nl+SOBLiGcQKBgH6udGpR4T4RHfRTvnh53TtuPbIGNhTFk/oPETNCBA+s17r6Cq76\nYOKRQ87OljRK9F0BsjQLxyJtGxowmI39p2Ij73hp5FvlSH/mKJMwgSFo9tn09oWY\nFJrfa2IPH0phgGRiOiriY+/oZrhe9JmCuhrcugbH0vqgwVaTySQqGLPJAoGBAMLO\nRDPJNHiopi4LHI3r2WlINL5bgIww0nL74RmpzdKe2iFtZWH1T1yhN5byUX8exgGP\nIv+9bCyfKvVljiaxsdz3naC8Rtigs7yEjOmNwVq0CH9g/0XsE+/dJc9cNI1d1gLj\nfI+7z8RIlOmDVUi0mk3/Z+FJRt6U/CWc1n5qbcpxAoGAdN+P0GbA1el0WxH0GBFu\nyz3QFmg2TDtjWfanQPhRlPOK0Sz8TfSQ7SGgZf4ArjPDjo9y9fLSbhcNvZiaZ+uO\ngdwlaM7Pq6pSJMzOi54dl76NqA3UhVxVPqcGpgpcQad3+PTChxrcdU0fA2fMw4/2\nY3/w9kvzdGFaFb5UFVl0C+A=\n-----END PRIVATE KEY-----\n",
+      "client_email":
+          "flutter-we-chat-shivani-patni@we-chat-2c0c7.iam.gserviceaccount.com",
+      "client_id": "112551770191617482670",
+      "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+      "token_uri": "https://oauth2.googleapis.com/token",
+      "auth_provider_x509_cert_url":
+          "https://www.googleapis.com/oauth2/v1/certs",
+      "client_x509_cert_url":
+          "https://www.googleapis.com/robot/v1/metadata/x509/flutter-we-chat-shivani-patni%40we-chat-2c0c7.iam.gserviceaccount.com",
+      "universe_domain": "googleapis.com"
+    };
+
+    List<String> scopes = [
+      "https://www.googleapis.com/auth/userinfo.email",
+      "https://www.googleapis.com/auth/firebase.database",
+      "https://www.googleapis.com/auth/firebase.messaging"
+    ];
+
+    http.Client client = await auth.clientViaServiceAccount(
+        auth.ServiceAccountCredentials.fromJson(serviceAccountJson), scopes);
+
+    //get access token
+
+    auth.AccessCredentials credentials =
+        await auth.obtainAccessCredentialsViaServiceAccount(
+            auth.ServiceAccountCredentials.fromJson(serviceAccountJson),
+            scopes,
+            client);
+    client.close();
+    log('accessToken : ${credentials.accessToken.data}');
+    return credentials.accessToken.data;
+  }
+
+  static sendNotificationToSelectdDriver(
+      String typeID, ChatUser chatUser, String msg) async {
+    final String serverKey = await getAccessToken();
+    String endpointFirebaseCloudMessaging =
+        'https://fcm.googleapis.com/v1/projects/we-chat-2c0c7/messages:send';
+
+    final Map<String, dynamic> message = {
+      "message": {
+        "token": chatUser.pushToken,
+        "notification": {"title": chatUser.name, "body": msg},
+        "data": {
+          "some_data": "User ID: $typeID",
+        },
+      }
+    };
+
+    final http.Response response =
+        await http.post(Uri.parse(endpointFirebaseCloudMessaging),
+            headers: <String, String>{
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $serverKey',
+            },
+            body: jsonEncode(message));
+
+    if (response.statusCode == 200) {
+      log('Notification send');
+    } else {
+      log('Failed to send FCM message:${response.statusCode}');
+    }
   }
 }

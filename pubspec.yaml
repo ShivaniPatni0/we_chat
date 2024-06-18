@@ -56,6 +56,9 @@ dependencies:
   flutter_notification_channel: ^3.1.0
   # for save image (download)
   gallery_saver: ^2.3.2
+  #push notification
+  googleapis:
+  googleapis_auth:
 
 dev_dependencies:
   flutter_test:

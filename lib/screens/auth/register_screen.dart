@@ -109,7 +109,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12)),
                       hintText: 'Enter Name',
-                      label: const Text('Name')),
+
+                      label: const Text('Name',style: TextStyle(color: Colors.yellow),)),
                 ),
                 const SizedBox(
                   height: 8.0,

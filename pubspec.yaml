@@ -59,6 +59,7 @@ dependencies:
   #push notification
   googleapis:
   googleapis_auth:
+  modal_progress_hud_nsn: ^0.5.1
 
 dev_dependencies:
   flutter_test:

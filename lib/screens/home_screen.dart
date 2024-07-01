@@ -140,10 +140,15 @@ class _HomeScreenState extends State<HomeScreen> {
                           // if some or all data is loaded then show it
                           case ConnectionState.active:
                           case ConnectionState.done:
-                            final data = snapshot.data?.docs;
+                          if(snapshot.data!.docs.isNotEmpty){
+                              final data = snapshot.data?.docs;
+                            
                             _list = data!
                                 .map((e) => ChatUser.fromJson(e.data()))
                                 .toList();
+
+                          }
+                          
                             
                         }
                        if (_list.isNotEmpty) {

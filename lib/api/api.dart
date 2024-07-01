@@ -8,10 +8,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:googleapis_auth/auth_io.dart' as auth;
-import 'package:googleapis/servicecontrol/v1.dart';
 
 class APIs {
 //for authentication
@@ -262,7 +260,7 @@ class APIs {
     await ref.doc(time).set(message.toJson()).then((value) async {
       await PushNotificationServices.getAccessToken();
       await PushNotificationServices.sendNotificationToSelectdDriver(
-          me.id, chatUser, msg);
+          me, chatUser, msg);
     });
   }
 
@@ -363,7 +361,7 @@ class PushNotificationServices {
   }
 
   static sendNotificationToSelectdDriver(
-      String typeID, ChatUser chatUser, String msg) async {
+      ChatUser typeID, ChatUser chatUser, String msg) async {
     final String serverKey = await getAccessToken();
     String endpointFirebaseCloudMessaging =
         'https://fcm.googleapis.com/v1/projects/we-chat-2c0c7/messages:send';
@@ -371,9 +369,9 @@ class PushNotificationServices {
     final Map<String, dynamic> message = {
       "message": {
         "token": chatUser.pushToken,
-        "notification": {"title": chatUser.name, "body": msg},
+        "notification": {"title": typeID.name, "body": msg},
         "data": {
-          "some_data": "User ID: $typeID",
+          "some_data": "User ID: ${typeID.id}",
         },
       }
     };

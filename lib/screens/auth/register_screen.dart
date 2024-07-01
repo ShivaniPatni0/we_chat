@@ -105,7 +105,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     name = value;
                   },
                   decoration: InputDecoration(
-                      prefixIcon: const Icon(Icons.email, color: Colors.orange),
+                      prefixIcon: const Icon(Icons.email, color: Colors.yellow),
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12)),
                       hintText: 'Enter Name',

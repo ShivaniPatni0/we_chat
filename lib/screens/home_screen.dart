@@ -232,7 +232,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     },
                     child: const Text(
                       'Cancel',
-                      style: TextStyle(color: Colors.blue, fontSize: 17),
+                      style: TextStyle(color: Colors.blue, fontSize: 19),
                     )),
 
                 //add button

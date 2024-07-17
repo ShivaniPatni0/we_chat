@@ -60,6 +60,7 @@ dependencies:
   googleapis:
   googleapis_auth:
   modal_progress_hud_nsn: ^0.5.1
+  flutter_svg: ^1.1.0
 
 dev_dependencies:
   flutter_test:
@@ -90,6 +91,7 @@ flutter:
     - assets/images/google.png
     - assets/images/add_image.png
     - assets/images/camera.png
+    - assets/images/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

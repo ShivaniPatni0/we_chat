@@ -12,7 +12,7 @@ import 'package:image_picker/image_picker.dart';
 import '../helper/dialogs.dart';
 import '../main.dart';
 import '../models/chat_user.dart';
-import 'auth/login_screen.dart';
+import 'auth/login/login_screen.dart';
 
 //profile screen -- to show signed in user info
 class ProfileScreen extends StatefulWidget {

@@ -2,12 +2,13 @@
 import 'dart:developer';
 
 import 'package:chat_application/api/api.dart';
+import 'package:chat_application/screens/welcome/welcome_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../main.dart';
-import 'auth/login_screen.dart';
+import 'auth/login/login_screen.dart';
 import 'home_screen.dart';
 
 //splash screen
@@ -38,7 +39,7 @@ class _SplashScreenState extends State<SplashScreen> {
       } else {
         //navigate to login screen
         Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (_) => const LoginScreen()));
+            context, MaterialPageRoute(builder: (_) => const WelcomeScreen()));
       }
     });
   }
@@ -49,6 +50,7 @@ class _SplashScreenState extends State<SplashScreen> {
     mq = MediaQuery.of(context).size;
 
     return Scaffold(
+      
       //body
       body: Stack(children: [
         //app logo

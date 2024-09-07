@@ -1,7 +1,4 @@
 import 'dart:io';
-import 'dart:math';
-
-import 'package:chat_application/screens/auth/login/login_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -10,6 +7,8 @@ import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
 import '../../../api/api.dart';
 import '../../../helper/dialogs.dart';
 import '../../home_screen.dart';
+import '../component/constant.dart';
+import '../signup/component/social_sign_up.dart';
 
 class LoginForm extends StatefulWidget {
   const LoginForm({
@@ -31,12 +30,13 @@ class _LoginFormState extends State<LoginForm> {
     Future.delayed(const Duration(milliseconds: 500), () {
       setState(() => _isAnimate = true);
     });
+  
   }
 
   _handleGoogleBtnClick() {
-    Dialogs.showProgressBar(context);
+    //  Dialogs.showProgressBar(context);
     _signInWithGoogle().then((user) async {
-      Navigator.pop(context);
+     // Navigator.pop(context);
       if (user != null) {
         // log('\nUser : ${user.user}');
         // log('\nUserAdditionalInfo : ${user.additionalUserInfo}');
@@ -78,32 +78,26 @@ class _LoginFormState extends State<LoginForm> {
       return await APIs.auth.signInWithCredential(credential);
     } catch (e) {
       print('\n_signInWithGoogle : $e');
-      Dialogs.showSnackbar(context, 'Something went wrong(Check Internet)');
+      // Dialogs.showSnackbar(context, 'Something went wrong(Check Internet)');
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    const kPrimaryColor = Color(0xFF6F35A5);
-    const kPrimaryLightColor = Color(0xFFF1E6FF);
     bool showSpinner = false;
     String? email;
     String? password;
-    LoginScreen login;
-
-    const double defaultPadding = 16.0;
     return ModalProgressHUD(
       inAsyncCall: showSpinner,
-
       child: Column(
         children: [
           TextField(
             keyboardType: TextInputType.emailAddress,
             textInputAction: TextInputAction.next,
             cursorColor: kPrimaryColor,
-             onChanged: (value) {
-                email = value;
-              },
+            onChanged: (value) {
+              email = value;
+            },
             decoration: InputDecoration(
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(15.0),
@@ -139,7 +133,6 @@ class _LoginFormState extends State<LoginForm> {
               ),
             ),
           ),
-          const SizedBox(height: defaultPadding),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: kPrimaryColor,
@@ -153,13 +146,13 @@ class _LoginFormState extends State<LoginForm> {
                 final user = await APIs.auth.signInWithEmailAndPassword(
                     email: email!, password: password!);
                 if (user != null) {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (_) => HomeScreen()));
+                  Navigator.push(
+                      context, MaterialPageRoute(builder: (_) => HomeScreen()));
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text('Password Incorect')));
                 }
-      
+
                 setState(() {
                   showSpinner = false;
                 });
@@ -176,16 +169,10 @@ class _LoginFormState extends State<LoginForm> {
               ),
             ),
           ),
-          const SizedBox(height: defaultPadding),
-      
-          InkWell(
-              onTap: () {
-                _handleGoogleBtnClick();
-              },
-              child: Image.asset(
-                'assets/images/google.png',
-                height: 20,
-              ))
+
+          SocalSignUp(ontapGoogle: () async {
+            await _handleGoogleBtnClick();
+          }),
           // AlreadyHaveAnAccountCheck(
           //   press: () {
           //     Navigator.push(

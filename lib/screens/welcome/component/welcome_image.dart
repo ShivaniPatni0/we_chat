@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../auth/component/constant.dart';
+
 class WelcomeImage extends StatelessWidget {
   const WelcomeImage({
     Key? key,
@@ -8,7 +10,6 @@ class WelcomeImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-     const double defaultPadding = 16.0;
     return Column(
       children: [
         const Text(

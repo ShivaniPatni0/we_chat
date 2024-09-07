@@ -1,4 +1,3 @@
-
 import 'dart:developer';
 
 import 'package:chat_application/api/api.dart';
@@ -6,6 +5,7 @@ import 'package:chat_application/screens/welcome/welcome_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/svg.dart';
 
 import '../../main.dart';
 import 'auth/login/login_screen.dart';
@@ -31,8 +31,7 @@ class _SplashScreenState extends State<SplashScreen> {
           statusBarColor: Colors.white));
 
       if (FirebaseAuth.instance.currentUser != null) {
-    
-      log('\nUser : ${APIs.auth.currentUser}');
+        log('\nUser : ${APIs.auth.currentUser}');
         //navigate to home screen
         Navigator.pushReplacement(
             context, MaterialPageRoute(builder: (_) => const HomeScreen()));
@@ -50,7 +49,6 @@ class _SplashScreenState extends State<SplashScreen> {
     mq = MediaQuery.of(context).size;
 
     return Scaffold(
-      
       //body
       body: Stack(children: [
         //app logo
@@ -58,7 +56,7 @@ class _SplashScreenState extends State<SplashScreen> {
             top: mq.height * .15,
             right: mq.width * .25,
             width: mq.width * .5,
-            child: Image.asset('assets/images/chat.png')),
+            child: SvgPicture.asset("assets/images/login.svg")),
 
         //google login button
         Positioned(

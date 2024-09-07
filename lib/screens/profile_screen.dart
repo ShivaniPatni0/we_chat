@@ -3,6 +3,8 @@ import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chat_application/api/api.dart';
+import 'package:chat_application/screens/auth/component/constant.dart';
+import 'package:chat_application/screens/welcome/welcome_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -43,7 +45,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             floatingActionButton: Padding(
               padding: const EdgeInsets.only(bottom: 10),
               child: FloatingActionButton.extended(
-                  backgroundColor: Colors.orange[400],
+                  backgroundColor: kPrimaryColor,
                   onPressed: () async {
                     Dialogs.showProgressBar(context);
                     await APIs.updateActiveStatus(false);
@@ -61,7 +63,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 Navigator.pushReplacement(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (_) => LoginScreen()))
+                                        builder: (_) => WelcomeScreen()))
                               })
                         });
                   },

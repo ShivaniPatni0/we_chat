@@ -14,6 +14,8 @@ import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:chat_application/widgets/chat_user_card.dart';
 
+import 'auth/component/constant.dart';
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -73,7 +75,7 @@ class _HomeScreenState extends State<HomeScreen> {
           },
           child: Scaffold(
             appBar: AppBar(
-              backgroundColor: Colors.orange[400],
+              backgroundColor: kPrimaryColor,
               leading: const Icon(CupertinoIcons.home),
               title: _isSearching
                   ? TextField(
@@ -176,7 +178,7 @@ class _HomeScreenState extends State<HomeScreen> {
             floatingActionButton: Padding(
                 padding: const EdgeInsets.only(bottom: 10),
                 child: FloatingActionButton(
-                  backgroundColor: Colors.orangeAccent,
+                  backgroundColor: kPrimaryColor,
                   onPressed: () async {
                     _addChatUserDialog();
                   },
@@ -221,7 +223,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     hintText: 'Email Id',
                     prefixIcon: const Icon(
                       Icons.email,
-                      color: Colors.orangeAccent,
+                      color: kPrimaryColor,
                     ),
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(15))),

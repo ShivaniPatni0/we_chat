@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../component/constant.dart';
+
 class LoginScreenTopImage extends StatelessWidget {
   const LoginScreenTopImage({
     Key? key,
@@ -8,10 +10,6 @@ class LoginScreenTopImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-       const kPrimaryColor = Color(0xFF6F35A5);
-    const kPrimaryLightColor = Color(0xFFF1E6FF);
-
-    const double defaultPadding = 16.0;
     return Column(
       children: [
         const Text(

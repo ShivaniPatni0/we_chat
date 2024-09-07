@@ -3,6 +3,7 @@ import 'dart:developer';
 
 import 'package:chat_application/firebase_options.dart';
 import 'package:chat_application/screens/splash_screen.dart';
+import 'package:chat_application/screens/welcome/welcome_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_notification_channel/flutter_notification_channel.dart';
@@ -57,7 +58,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const SplashScreen(),
+      home: const WelcomeScreen(),
     );
   }
 }

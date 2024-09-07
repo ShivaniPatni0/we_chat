@@ -1,5 +1,6 @@
 import 'package:chat_application/main.dart';
 import 'package:chat_application/screens/auth/component/background.dart';
+import 'package:chat_application/screens/auth/component/constant.dart';
 import 'package:chat_application/screens/auth/login/login_screen_top_image.dart';
 import 'package:flutter/material.dart';
 import 'login_form.dart';
@@ -21,13 +22,13 @@ class _LoginScreenState extends State<LoginScreen> {
       appBar: AppBar(
         leading: IconButton(
           iconSize: 30,
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: const Icon(Icons.arrow_back, color: kPrimaryColor),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
       body: const SingleChildScrollView(
         child: Responsive(
-          mobile: const MobileLoginScreen(),
+          mobile:  MobileLoginScreen(),
           desktop: Row(
             children: [
               Expanded(
@@ -119,7 +120,7 @@ class MobileLoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return const Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
         LoginScreenTopImage(),

@@ -8,7 +8,7 @@ import 'package:chat_application/main.dart';
 import 'package:chat_application/models/message.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:gallery_saver/gallery_saver.dart';
+// import 'package:gallery_saver/gallery_saver.dart';
 
 class MessageCard extends StatefulWidget {
   final Message message;
@@ -213,17 +213,17 @@ class _MessageCardState extends State<MessageCard> {
                       name: 'Save Image',
                       onTap: () async {
                         try {
-                          log("Image URl : ${widget.message.msg}");
-                          await GallerySaver.saveImage(widget.message.msg)
-                              .then((success) {
-                            //for hiding bottom sheet
-                            Navigator.pop(context);
+                         // log("Image URl : ${widget.message.msg}");
+                          // await GallerySaver.saveImage(widget.message.msg)
+                          //     .then((success) {
+                          //   //for hiding bottom sheet
+                          //   Navigator.pop(context);
 
-                            if (success != null && success) {
-                              Dialogs.showSnackbar(
-                                  context, "Image Saved Successfully..!");
-                            }
-                          });
+                          //   if (success != null && success) {
+                          //     Dialogs.showSnackbar(
+                          //         context, "Image Saved Successfully..!");
+                          //   }
+                          // });
                         } catch (e) {
                           log("\Image Error : $e");
                         }

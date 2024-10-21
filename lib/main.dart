@@ -1,4 +1,3 @@
-
 import 'dart:developer';
 
 import 'package:chat_application/firebase_options.dart';
@@ -64,18 +63,16 @@ class MyApp extends StatelessWidget {
 }
 
 _initilizeFirebase() async {
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform);
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-    var result = await FlutterNotificationChannel().registerNotificationChannel(
+  var result = await FlutterNotificationChannel().registerNotificationChannel(
     description: 'For Showing Message Notification',
     id: 'chats',
     importance: NotificationImportance.IMPORTANCE_HIGH,
     name: 'Chats',
     visibility: NotificationVisibility.VISIBILITY_PUBLIC,
-);
-log(result);
-  
+  );
+  log(result);
 }
 
 

@@ -10,6 +10,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 
 class CharUserCard extends StatefulWidget {
   final ChatUser user;
+
   const CharUserCard({super.key, required this.user});
 
   @override
@@ -59,7 +60,7 @@ class _CharUserCardState extends State<CharUserCard> {
                         // placeholder: (context, url) => CircularProgressIndicator(),
                         errorWidget: (context, url, error) =>
                             const CircleAvatar(
-                                child:  Icon(CupertinoIcons.person)),
+                                child: Icon(CupertinoIcons.person)),
                       ),
                     ),
                     title: Text(widget.user.name),

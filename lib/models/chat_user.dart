@@ -10,15 +10,15 @@ class ChatUser {
     required this.image,
     required this.createdAt,
   });
-  late  String name;
-  late  String about;
-  late  bool isOnline;
-  late  String pushToken;
-  late  String lastActive;
-  late  String id;
-  late  String email;
-  late  String image;
-  late  String createdAt;
+  late String name;
+  late String about;
+  late bool isOnline;
+  late String pushToken;
+  late String lastActive;
+  late String id;
+  late String email;
+  late String image;
+  late String createdAt;
 
   ChatUser.fromJson(Map<String, dynamic> json) {
     name = json['name'] ?? '';
@@ -43,6 +43,48 @@ class ChatUser {
     _data['email'] = email;
     _data['image'] = image;
     _data['created_at'] = createdAt;
+    return _data;
+  }
+}
+
+class GroupChat {
+  GroupChat(
+      {required this.id,
+      required this.chatRoomTitle,
+      required this.deleted,
+      required this.deletedAt,
+      required this.isGroup,
+      required this.members,
+      required this.memberIds});
+  late String id;
+  late String chatRoomTitle;
+  late List<dynamic> memberIds;
+  late bool isGroup;
+  late bool deleted;
+  late String? deletedAt;
+  late List<dynamic> members;
+
+  GroupChat.fromJson(Map<String, dynamic> json) {
+    id = json['id'] ?? '';
+    chatRoomTitle = json['chatRoomTitle'] ?? '';
+    memberIds = json['memberIds'] ?? '';
+    isGroup = json['isGroup'] ?? '';
+    deleted = json['deleted'] ?? '';
+    deletedAt = json['deletedAt'] ?? '';
+    members = json['members'] ?? [];
+  }
+
+  Map<String, dynamic> toJson() {
+    final _data = <String, dynamic>{};
+
+    _data['id'] = id;
+    _data['chatRoomTitle'] = chatRoomTitle;
+    _data['memberIds'] = memberIds;
+    _data['isGroup'] = isGroup;
+    _data['deleted'] = deleted;
+    _data['deletedAt'] = deletedAt;
+    _data['members'] = members;
+
     return _data;
   }
 }

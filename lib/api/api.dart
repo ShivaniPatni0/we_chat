@@ -1,15 +1,16 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
-
 import 'package:chat_application/models/chat_user.dart';
 import 'package:chat_application/models/message.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:googleapis/cloudsearch/v1.dart';
 import 'package:http/http.dart' as http;
 import 'package:googleapis_auth/auth_io.dart' as auth;
+import 'package:intl/intl.dart';
 
 class APIs {
 //for authentication
@@ -76,6 +77,101 @@ class APIs {
     }
   }
 
+// for adding group chat user for our conversion
+  static Future<List<Map<String, dynamic>>> addGroupChatUsers(
+      List<String> emails, String groupTitle) async {
+    List<Map<String, dynamic>> results = [];
+    List<String> users = [];
+
+    // Fetch existing group chats
+    final data = await firestore
+        .collection('users')
+        .doc(user.uid)
+        .collection('my_users_group')
+        .get();
+
+    List<GroupChat> groupChats = data.docs.map((doc) {
+      final data = doc.data();
+      return GroupChat(
+        id: doc.id,
+        chatRoomTitle: groupTitle,
+        memberIds: emails,
+        isGroup: data['isGroup'] ?? false,
+        deleted: data['deleted'] ?? false,
+        deletedAt: '',
+        members: users,
+      );
+    }).toList();
+
+    for (String email in emails) {
+      try {
+        final data = await firestore
+            .collection('users')
+            .where('email', isEqualTo: email)
+            .get();
+
+        if (data.docs.isNotEmpty) {
+          // Check if the user is not trying to add themselves
+          if (data.docs.first.id != user.uid) {
+            final data1 = await firestore
+                .collection('users')
+                .where('id', isEqualTo: data.docs.first.id)
+                .get();
+            // User exists, add them to the group
+            await firestore
+                .collection('users')
+                .doc(user.uid)
+                .collection('my_users_group');
+            users.add(data1.docs.first.id);
+
+            results.add({
+              'email': email,
+              'success': true,
+              'message': 'User added successfully'
+            });
+          } else {
+            // User is trying to add themselves
+            results.add({
+              'email': email,
+              'success': false,
+              'message': 'You cannot add yourself'
+            });
+          }
+        } else {
+          // User doesn't exist
+          results.add(
+              {'email': email, 'success': false, 'message': 'User not found'});
+        }
+      } catch (e) {
+        // Handle any errors that occur during the operation
+        results.add({'email': email, 'success': false, 'message': 'Error: $e'});
+      }
+    }
+
+    if (emails.length > 1) {
+      // Ensure at least one other member is added
+      final newChatDoc = await firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('my_users_group')
+          .add({
+        'chatRoomTitle': groupTitle,
+        'memberIds': emails,
+        'isGroup': true,
+        'deleted': false,
+        'members': users
+        // Other fields you want to add
+      });
+
+      // Get the document ID
+      String newGroupChatId = newChatDoc.id;
+      // Now, update the document to add the ID as a field
+      await newChatDoc.update({'id': newGroupChatId, 'members': users});
+    }
+    return results;
+  }
+
+// self intro
   static Future<void> getSelfIntro() async {
     await firestore
         .collection('users')
@@ -137,6 +233,38 @@ class APIs {
         : Stream.empty();
   }
 
+  // for getting all group user from firebase database
+  static Stream<QuerySnapshot<Map<String, dynamic>>> getAllGroupUsers(
+      List<String> id) {
+    log('\nUserIds : $id');
+    return id.isNotEmpty
+        ? firestore
+            .collection('users')
+            .doc(user.uid)
+            .collection('my_users_group')
+            .where('id', whereIn: id)
+            .snapshots()
+        : Stream.empty();
+  }
+
+  // for getting all group user from firebase database
+  static Stream<QuerySnapshot<Map<String, dynamic>>> getAllGroupUsersID(
+      List<dynamic> id) {
+    log('\nUserIds : $id');
+    return id.isNotEmpty
+        ? firestore.collection('users').where('id', whereIn: id).snapshots()
+        : Stream.empty();
+  }
+
+  // for getting all user group from firebase database
+  static Stream<QuerySnapshot<Map<String, dynamic>>> getAllUserGroupId() {
+    return firestore
+        .collection('users')
+        .doc(user.uid)
+        .collection('my_users_group')
+        .snapshots();
+  }
+
   // for adding an user to my user when first message is send
   static Future<void> sendFirstMessage(
       ChatUser chatUser, String msg, Type type) async {
@@ -146,6 +274,17 @@ class APIs {
         .collection('my_users')
         .doc(user.uid)
         .set({}).then((value) => {sendMessage(chatUser, msg, type)});
+  }
+
+  // for adding an user to my user when first message is send
+  static Future<void> sendFirstMessageGroup(
+      GroupChat groupUser, String msg, Type type) async {
+    await firestore
+        .collection('users')
+        .doc(groupUser.id)
+        .collection('my_users_group')
+        .doc(groupUser.id)
+        .set({}).then((value) => {sendMessageGroup(groupUser, msg, type)});
   }
 
   // update user info
@@ -217,6 +356,17 @@ class APIs {
         .snapshots();
   }
 
+  // for getting group user info
+  static Stream<QuerySnapshot<Map<String, dynamic>>> getGroupUserInfo(
+      GroupChat groupUser) {
+    return firestore
+        .collection('users')
+        .doc(user.uid)
+        .collection('my_users_group')
+        .where('id', isEqualTo: groupUser.id)
+        .snapshots();
+  }
+
 //update online or last active status of user
   static Future<void> updateActiveStatus(bool isOnline) async {
     firestore.collection('users').doc(user.uid).update({
@@ -232,9 +382,23 @@ class APIs {
       ? '${user.uid}_$id'
       : '${id}_${user.uid}';
 
+  static String getGroupConversationID(String id) =>
+      user.uid.hashCode <= id.hashCode
+          ? '${user.uid}_$id'
+          : '${id}_${user.uid}';
+
 // for getting all messages of a specific conversion from firestore firebase
   static Stream<QuerySnapshot<Map<String, dynamic>>> getAllMessages(
       ChatUser user) {
+    return firestore
+        .collection('chats/${getConversationID(user.id)}/messages/')
+        .orderBy('sent', descending: true)
+        .snapshots();
+  }
+
+  // for getting all messages of a specific conversion from firestore firebase
+  static Stream<QuerySnapshot<Map<String, dynamic>>> getAllMessagesGroupChat(
+      GroupChat user) {
     return firestore
         .collection('chats/${getConversationID(user.id)}/messages/')
         .orderBy('sent', descending: true)
@@ -264,6 +428,29 @@ class APIs {
     });
   }
 
+  //for sending message
+  static Future<void> sendMessageGroup(
+      GroupChat groupUser, String msg, Type type) async {
+    //message sending time(also used as id)
+    final time = DateTime.now().millisecondsSinceEpoch.toString();
+
+    //message send to
+    final Message message = Message(
+        msg: msg,
+        read: '',
+        told: groupUser.members[0],
+        type: type,
+        fromId: user.uid,
+        sent: time);
+    final ref = firestore
+        .collection('chats/${getConversationID(groupUser.id)}/group_messages');
+    await ref.doc(time).set(message.toJson()).then((value) async {
+      await PushNotificationServices.getAccessToken();
+      // await PushNotificationServices.sendNotificationToSelectdDriver(
+      //     me, chatUser, msg);
+    });
+  }
+
 //update read status of message
   static Future<void> updateMessageReadStatus(Message message) async {
     firestore
@@ -275,6 +462,16 @@ class APIs {
 //get only last message of a specific chat
   static Stream<QuerySnapshot<Map<String, dynamic>>> getLastMessages(
       ChatUser user) {
+    return firestore
+        .collection('chats/${getConversationID(user.id)}/messages/')
+        .limit(1)
+        .orderBy('sent', descending: true)
+        .snapshots();
+  }
+
+  //get only last message of a specific chat group
+  static Stream<QuerySnapshot<Map<String, dynamic>>> getLastMessagesGroup(
+      GroupChat user) {
     return firestore
         .collection('chats/${getConversationID(user.id)}/messages/')
         .limit(1)
@@ -302,7 +499,7 @@ class APIs {
 
   static Future<void> deleteMessage(Message message) async {
     await firestore
-        .collection('chats/${getConversationID(message.told)}/messages')
+        .collection('chats/${getConversationID(message.told!)}/messages')
         .doc(message.sent)
         .delete();
 
@@ -313,7 +510,7 @@ class APIs {
 
   static void updateMessage(Message message, String updatedMsg) async {
     await firestore
-        .collection('chats/${getConversationID(message.told)}/messages')
+        .collection('chats/${getConversationID(message.told!)}/messages')
         .doc(message.sent)
         .update({'msg': updatedMsg});
   }

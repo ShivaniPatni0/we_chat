@@ -93,6 +93,7 @@ class APIs {
     List<GroupChat> groupChats = data.docs.map((doc) {
       final data = doc.data();
       return GroupChat(
+        groupid: doc.id,
         id: doc.id,
         chatRoomTitle: groupTitle,
         memberIds: emails,
@@ -149,24 +150,28 @@ class APIs {
     }
 
     if (emails.length > 1) {
-      // Ensure at least one other member is added
-      final newChatDoc = await firestore
-          .collection('users')
-          .doc(user.uid)
-          .collection('my_users_group')
-          .add({
-        'chatRoomTitle': groupTitle,
-        'memberIds': emails,
-        'isGroup': true,
-        'deleted': false,
-        'members': users
-        // Other fields you want to add
-      });
+      users.add(user.uid);
 
-      // Get the document ID
-      String newGroupChatId = newChatDoc.id;
-      // Now, update the document to add the ID as a field
-      await newChatDoc.update({'id': newGroupChatId, 'members': users});
+      for (String id in users) {
+        // Ensure at least one other member is added
+        final newChatDoc = await firestore
+            .collection('users')
+            .doc(id)
+            .collection('my_users_group')
+            .add({
+          'chatRoomTitle': groupTitle,
+          'memberIds': emails,
+          'isGroup': true,
+          'deleted': false,
+          'members': users
+          // Other fields you want to add
+        });
+
+        // // Get the document ID
+        // String newGroupChatId = newChatDoc.id;
+        // // Now, update the document to add the ID as a field
+        await newChatDoc.update({'id': groupChats.first.id, 'members': users});
+      }
     }
     return results;
   }
@@ -283,7 +288,7 @@ class APIs {
         .collection('users')
         .doc(groupUser.id)
         .collection('my_users_group')
-        .doc(groupUser.id)
+        .doc(user.uid)
         .set({}).then((value) => {sendMessageGroup(groupUser, msg, type)});
   }
 
@@ -438,7 +443,7 @@ class APIs {
     final Message message = Message(
         msg: msg,
         read: '',
-        told: groupUser.members[0],
+        told: groupUser.members[1],
         type: type,
         fromId: user.uid,
         sent: time);

@@ -55,6 +55,7 @@ class GroupChat {
       required this.deletedAt,
       required this.isGroup,
       required this.members,
+      required this.groupid,
       required this.memberIds});
   late String id;
   late String chatRoomTitle;
@@ -63,9 +64,11 @@ class GroupChat {
   late bool deleted;
   late String? deletedAt;
   late List<dynamic> members;
+  late String groupid;
 
   GroupChat.fromJson(Map<String, dynamic> json) {
     id = json['id'] ?? '';
+    groupid = json['groupid'] ?? '';
     chatRoomTitle = json['chatRoomTitle'] ?? '';
     memberIds = json['memberIds'] ?? '';
     isGroup = json['isGroup'] ?? '';
@@ -84,6 +87,7 @@ class GroupChat {
     _data['deleted'] = deleted;
     _data['deletedAt'] = deletedAt;
     _data['members'] = members;
+    _data['groupid'] = groupid;
 
     return _data;
   }

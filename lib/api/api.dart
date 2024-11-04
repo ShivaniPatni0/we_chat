@@ -90,19 +90,19 @@ class APIs {
         .collection('my_users_group')
         .get();
 
-    List<GroupChat> groupChats = data.docs.map((doc) {
-      final data = doc.data();
-      return GroupChat(
-        groupid: doc.id,
-        id: doc.id,
-        chatRoomTitle: groupTitle,
-        memberIds: emails,
-        isGroup: data['isGroup'] ?? false,
-        deleted: data['deleted'] ?? false,
-        deletedAt: '',
-        members: users,
-      );
-    }).toList();
+    // List<GroupChat> groupChats = data.docs.map((doc) {
+    //   final data = doc.data();
+    //   return GroupChat(
+    //     groupid: doc.id,
+    //     id: doc.id,
+    //     chatRoomTitle: groupTitle,
+    //     memberIds: emails,
+    //     isGroup: data['isGroup'] ?? false,
+    //     deleted: data['deleted'] ?? false,
+    //     deletedAt: '',
+    //     members: users,
+    //   );
+    // }).toList();
 
     for (String email in emails) {
       try {
@@ -118,11 +118,11 @@ class APIs {
                 .collection('users')
                 .where('id', isEqualTo: data.docs.first.id)
                 .get();
-            // User exists, add them to the group
-            await firestore
-                .collection('users')
-                .doc(user.uid)
-                .collection('my_users_group');
+            // // User exists, add them to the group
+            // await firestore
+            //     .collection('users')
+            //     .doc(user.uid)
+            //     .collection('my_users_group');
             users.add(data1.docs.first.id);
 
             results.add({
@@ -150,11 +150,24 @@ class APIs {
     }
 
     if (emails.length > 1) {
-      users.add(user.uid);
+      // Ensure at least one other member is added
+      final newChatDoc = await firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('my_users_group')
+          .add({
+        'chatRoomTitle': groupTitle,
+        'memberIds': emails,
+        'isGroup': true,
+        'deleted': false,
+        'members': users
+        // Other fields you want to add
+      });
+
+      // // Now, update the document to add the ID as a field
 
       for (String id in users) {
-        // Ensure at least one other member is added
-        final newChatDoc = await firestore
+        final newChatDocadd = await firestore
             .collection('users')
             .doc(id)
             .collection('my_users_group')
@@ -167,10 +180,8 @@ class APIs {
           // Other fields you want to add
         });
 
-        // // Get the document ID
-        // String newGroupChatId = newChatDoc.id;
-        // // Now, update the document to add the ID as a field
-        await newChatDoc.update({'id': groupChats.first.id, 'members': users});
+        await newChatDocadd.update({'id': newChatDoc.id, 'members': users});
+        await newChatDoc.update({'id': newChatDoc.id, 'members': users});
       }
     }
     return results;
@@ -286,9 +297,9 @@ class APIs {
       GroupChat groupUser, String msg, Type type) async {
     await firestore
         .collection('users')
-        .doc(groupUser.id)
-        .collection('my_users_group')
         .doc(user.uid)
+        .collection('my_users_group')
+        .doc(groupUser.id)
         .set({}).then((value) => {sendMessageGroup(groupUser, msg, type)});
   }
 
@@ -405,7 +416,7 @@ class APIs {
   static Stream<QuerySnapshot<Map<String, dynamic>>> getAllMessagesGroupChat(
       GroupChat user) {
     return firestore
-        .collection('chats/${getConversationID(user.id)}/messages/')
+        .collection('chats/${getConversationID(user.id)}/group_messages/')
         .orderBy('sent', descending: true)
         .snapshots();
   }
@@ -443,7 +454,7 @@ class APIs {
     final Message message = Message(
         msg: msg,
         read: '',
-        told: groupUser.members[1],
+        told: groupUser.id,
         type: type,
         fromId: user.uid,
         sent: time);

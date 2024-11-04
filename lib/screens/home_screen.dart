@@ -389,25 +389,9 @@ class _groupScreenState extends State<GroupScreen> {
                     return ListView.builder(
                         itemCount: widget.list.length,
                         itemBuilder: (context, index) {
-                          return StreamBuilder<
-                                  QuerySnapshot<Map<String, dynamic>>>(
-                              stream: APIs.getAllGroupUsersID(widget
-                                  .list[0].members
-                                  .map((e) => e)
-                                  .toList()),
-                              builder: (context, snapshot) {
-                                // final data = snapshot.data.docs;
-
-                                // // //groupChat list
-                                // final value = data
-                                //     .map((e) => ChatUser.fromJson(e.data()))
-                                //     .toList();
-
-                                // print(value.length);
-                                return GroupUserCard(
-                                  user: widget.list[index],
-                                );
-                              });
+                          return GroupUserCard(
+                            user: widget.list[index],
+                          );
                         });
                   } else {
                     return const Center(

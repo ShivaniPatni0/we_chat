@@ -51,17 +51,17 @@ class GroupChat {
   GroupChat(
       {required this.id,
       required this.chatRoomTitle,
-      required this.deleted,
+      // required this.deleted,
       required this.deletedAt,
-      required this.isGroup,
-      required this.members,
+      //this.isGroup,
       required this.groupid,
+      required this.members,
       required this.memberIds});
   late String id;
   late String chatRoomTitle;
   late List<dynamic> memberIds;
-  late bool isGroup;
-  late bool deleted;
+  //late bool? isGroup;
+  // late bool deleted;
   late String? deletedAt;
   late List<dynamic> members;
   late String groupid;
@@ -70,9 +70,9 @@ class GroupChat {
     id = json['id'] ?? '';
     groupid = json['groupid'] ?? '';
     chatRoomTitle = json['chatRoomTitle'] ?? '';
-    memberIds = json['memberIds'] ?? '';
-    isGroup = json['isGroup'] ?? '';
-    deleted = json['deleted'] ?? '';
+    memberIds = json['memberIds'] ?? [];
+    // isGroup = json['isGroup'] ?? false;
+    // deleted = json['deleted'] ?? '';
     deletedAt = json['deletedAt'] ?? '';
     members = json['members'] ?? [];
   }
@@ -81,13 +81,13 @@ class GroupChat {
     final _data = <String, dynamic>{};
 
     _data['id'] = id;
+    _data['groupid'] = groupid;
     _data['chatRoomTitle'] = chatRoomTitle;
     _data['memberIds'] = memberIds;
-    _data['isGroup'] = isGroup;
-    _data['deleted'] = deleted;
+    //_data['isGroup'] = isGroup;
+    // _data['deleted'] = deleted;
     _data['deletedAt'] = deletedAt;
     _data['members'] = members;
-    _data['groupid'] = groupid;
 
     return _data;
   }

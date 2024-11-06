@@ -12,7 +12,10 @@ import 'package:cached_network_image/cached_network_image.dart';
 class GroupUserCard extends StatefulWidget {
   final GroupChat user;
 
-  const GroupUserCard({super.key, required this.user});
+  const GroupUserCard({
+    super.key,
+    required this.user,
+  });
 
   @override
   State<GroupUserCard> createState() => _GroupUserCardState();

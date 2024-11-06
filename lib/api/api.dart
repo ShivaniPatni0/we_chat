@@ -79,7 +79,7 @@ class APIs {
 
 // for adding group chat user for our conversion
   static Future<List<Map<String, dynamic>>> addGroupChatUsers(
-      List<String> emails, String groupTitle) async {
+      List<dynamic> emails, String groupTitle) async {
     List<Map<String, dynamic>> results = [];
     List<String> users = [];
 
@@ -90,19 +90,19 @@ class APIs {
         .collection('my_users_group')
         .get();
 
-    // List<GroupChat> groupChats = data.docs.map((doc) {
-    //   final data = doc.data();
-    //   return GroupChat(
-    //     groupid: doc.id,
-    //     id: doc.id,
-    //     chatRoomTitle: groupTitle,
-    //     memberIds: emails,
-    //     isGroup: data['isGroup'] ?? false,
-    //     deleted: data['deleted'] ?? false,
-    //     deletedAt: '',
-    //     members: users,
-    //   );
-    // }).toList();
+    List<GroupChat> groupChats = data.docs.map((doc) {
+      final data = doc.data();
+      return GroupChat(
+        groupid: '',
+        id: doc.id,
+        chatRoomTitle: groupTitle,
+        memberIds: emails,
+        // isGroup: data['isGroup'] ?? false,
+        // deleted: data['deleted'] ?? false,
+        deletedAt: '',
+        members: users,
+      );
+    }).toList();
 
     for (String email in emails) {
       try {
@@ -119,10 +119,10 @@ class APIs {
                 .where('id', isEqualTo: data.docs.first.id)
                 .get();
             // // User exists, add them to the group
-            // await firestore
-            //     .collection('users')
-            //     .doc(user.uid)
-            //     .collection('my_users_group');
+            await firestore
+                .collection('users')
+                .doc(user.uid)
+                .collection('my_users_group');
             users.add(data1.docs.first.id);
 
             results.add({
@@ -158,7 +158,7 @@ class APIs {
           .add({
         'chatRoomTitle': groupTitle,
         'memberIds': emails,
-        'isGroup': true,
+        //'isGroup': true,
         'deleted': false,
         'members': users
         // Other fields you want to add
@@ -174,14 +174,19 @@ class APIs {
             .add({
           'chatRoomTitle': groupTitle,
           'memberIds': emails,
-          'isGroup': true,
+          // 'isGroup': true,
           'deleted': false,
           'members': users
           // Other fields you want to add
         });
 
-        await newChatDocadd.update({'id': newChatDoc.id, 'members': users});
-        await newChatDoc.update({'id': newChatDoc.id, 'members': users});
+        await newChatDocadd.update({
+          'id': newChatDocadd.id,
+          'members': users,
+          'groupid': newChatDoc.id
+        });
+        await newChatDoc.update(
+            {'id': newChatDoc.id, 'members': users, 'groupid': newChatDoc.id});
       }
     }
     return results;
@@ -258,7 +263,7 @@ class APIs {
             .collection('users')
             .doc(user.uid)
             .collection('my_users_group')
-            .where('id', whereIn: id)
+            .where("id", whereIn: id)
             .snapshots()
         : Stream.empty();
   }
@@ -297,9 +302,9 @@ class APIs {
       GroupChat groupUser, String msg, Type type) async {
     await firestore
         .collection('users')
-        .doc(user.uid)
-        .collection('my_users_group')
         .doc(groupUser.id)
+        .collection('my_users_group')
+        .doc(user.uid)
         .set({}).then((value) => {sendMessageGroup(groupUser, msg, type)});
   }
 
@@ -399,9 +404,7 @@ class APIs {
       : '${id}_${user.uid}';
 
   static String getGroupConversationID(String id) =>
-      user.uid.hashCode <= id.hashCode
-          ? '${user.uid}_$id'
-          : '${id}_${user.uid}';
+      user.uid.hashCode <= id.hashCode ? '$id' : '${id}';
 
 // for getting all messages of a specific conversion from firestore firebase
   static Stream<QuerySnapshot<Map<String, dynamic>>> getAllMessages(
@@ -416,7 +419,8 @@ class APIs {
   static Stream<QuerySnapshot<Map<String, dynamic>>> getAllMessagesGroupChat(
       GroupChat user) {
     return firestore
-        .collection('chats/${getConversationID(user.id)}/group_messages/')
+        .collection(
+            'chats/${getGroupConversationID(user.groupid)}/group_messages/')
         .orderBy('sent', descending: true)
         .snapshots();
   }
@@ -454,14 +458,14 @@ class APIs {
     final Message message = Message(
         msg: msg,
         read: '',
-        told: groupUser.id,
+        told: groupUser.groupid,
         type: type,
         fromId: user.uid,
         sent: time);
-    final ref = firestore
-        .collection('chats/${getConversationID(groupUser.id)}/group_messages');
+    final ref = firestore.collection(
+        'chats/${getGroupConversationID(groupUser.groupid)}/group_messages');
     await ref.doc(time).set(message.toJson()).then((value) async {
-      await PushNotificationServices.getAccessToken();
+      // await PushNotificationServices.getAccessToken();
       // await PushNotificationServices.sendNotificationToSelectdDriver(
       //     me, chatUser, msg);
     });
